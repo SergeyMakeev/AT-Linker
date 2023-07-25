@@ -1,0 +1,1 @@
+Allods Team Proxy Linker that automatically generates `.def` file from the input `.obj` files (supports ELF/COFF formats)
