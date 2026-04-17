@@ -29,18 +29,32 @@ Outputs (typical):
 
 To build only the library (e.g. on CI without the proxy), configure with `-DLINK_EXPORT_ALL_BUILD_PROXY=OFF`.
 
+The proxy and `defgen` are built with the **static MSVC runtime** (`/MT` / `/MTd`) so the executable does not depend on the VC++ redistributable DLLs (`vcruntime*.dll`, `msvcp*.dll`). You can confirm with `dumpbin /dependents link-export-all.exe` (only Windows system DLLs such as `KERNEL32.dll` should appear).
+
 ## Using the proxy
 
-The proxy must know where the **real** `link.exe` is, via **`/lorig:<path>`** (this argument is **consumed** and not passed downstream).
+The proxy must know where the **real** `link.exe` is. Resolution order:
+
+1. **`/lorig:<path>`** on the command line (optional; stripped and **not** passed to the real linker).
+2. Otherwise the environment variable **`LINK_EXPORT_ALL_LINKER`**, set to the full path of `link.exe` (optional quotes; trimmed).
+
+If you set **`LINK_EXPORT_ALL_LINKER`** once in your environment or build machine, you do not need **`/lorig:`** at all.
 
 Workflow (simplified):
 
 1. Pass your usual linker arguments, plus **`/DEFGEN`**, **`/DEF:<path\to\exports.def>`** (COFF/MSVC objects), **or** an **`.emd`** path plus **`/DEFGEN`** for the ELF-style export block.
-2. The tool collects **`*.obj`** (and optional **`.olst`** response lists), regenerates the `.def` when inputs are newer than the `.def` or the object count line changed, then runs **`/lorig:`** `link.exe` with the remaining arguments.
+2. The tool collects **`*.obj`** (and optional **`.olst`** response lists), regenerates the `.def` when inputs are newer than the `.def` or the object count line changed, then runs the resolved **`link.exe`** with the remaining arguments.
 
 Optional **`DefBuildIgnores.txt`** in the **current working directory**: one substring per line; export names containing that substring are skipped (same behavior as the legacy tool).
 
-Example fragments:
+Example (environment variable set to `link.exe`; no `/lorig:`):
+
+```bat
+set LINK_EXPORT_ALL_LINKER=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.xx.xxxxx\bin\Hostx64\x64\link.exe
+link-export-all.exe /DEFGEN /DEF:myexports.def /DLL ... *.obj
+```
+
+Example with explicit override:
 
 ```bat
 link-export-all.exe /lorig:"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.xx.xxxxx\bin\Hostx64\x64\link.exe" ^

@@ -4,7 +4,6 @@
 
 #include "defgen/defgen.hpp"
 
-#include <Shlwapi.h>
 #include <Windows.h>
 
 #include <algorithm>
@@ -15,14 +14,54 @@
 #include <string>
 #include <vector>
 
-#pragma comment(lib, "Shlwapi.lib")
-
 namespace fs = std::filesystem;
 
 namespace
 {
 
 constexpr int kMaxCmdLine = 32768;
+
+/// Full path to the real `link.exe`. When set, `/lorig:` is optional.
+constexpr wchar_t kEnvOriginalLinker[] = L"LINK_EXPORT_ALL_LINKER";
+
+void trim_surrounding_ws_and_quotes(std::wstring& s)
+{
+    while (!s.empty() && (s.front() == L' ' || s.front() == L'\t'))
+    {
+        s.erase(0, 1);
+    }
+    while (!s.empty() && (s.back() == L' ' || s.back() == L'\t'))
+    {
+        s.pop_back();
+    }
+    if (s.size() >= 2 && s.front() == L'\"' && s.back() == L'\"')
+    {
+        s = s.substr(1, s.size() - 2);
+    }
+}
+
+[[nodiscard]] std::wstring read_original_linker_from_env()
+{
+    wchar_t buf[kMaxCmdLine]{};
+    const DWORD n = GetEnvironmentVariableW(kEnvOriginalLinker, buf, static_cast<DWORD>(std::size(buf)));
+    if (n == 0 || n >= std::size(buf))
+    {
+        return {};
+    }
+    std::wstring s(buf, n);
+    trim_surrounding_ws_and_quotes(s);
+    return s;
+}
+
+/// Prefer `/lorig:` from the command line; otherwise `LINK_EXPORT_ALL_LINKER`.
+[[nodiscard]] std::wstring resolve_original_linker_path(const std::wstring& from_cmdline)
+{
+    if (!from_cmdline.empty())
+    {
+        return from_cmdline;
+    }
+    return read_original_linker_from_env();
+}
 
 bool verbose_out = false;
 
@@ -607,12 +646,14 @@ void join_lines_mbs(const std::vector<std::wstring>& lines, std::vector<std::byt
         std::printf("Can't generate temp filename\n");
         return -2;
     }
-    PathRemoveExtensionW(temp_file_path);
-    if (PathAddExtensionW(temp_file_path, L".rsp") != TRUE)
+    const fs::path with_rsp = fs::path(temp_file_path).replace_extension(L".rsp");
+    const std::wstring w = with_rsp.native();
+    if (w.size() >= static_cast<size_t>(kMaxCmdLine))
     {
-        std::printf("Can't change extension temp filename\n");
+        std::printf("Temp rsp path too long\n");
         return -3;
     }
+    wcscpy_s(temp_file_path, static_cast<size_t>(kMaxCmdLine), w.c_str());
     return 0;
 }
 
@@ -742,14 +783,16 @@ int wmain(int argc, wchar_t* argv[])
         return 0;
     }
 
-    if (prms.linker_path.empty())
+    const std::wstring linker_path = resolve_original_linker_path(prms.linker_path);
+    if (linker_path.empty())
     {
-        std::printf("No /lorig: path to the real linker (link.exe)\n");
+        std::printf("No path to the real linker (link.exe). Set environment variable LINK_EXPORT_ALL_LINKER\n"
+                    "to the full path of link.exe, or pass /lorig:<path> (not forwarded to the linker).\n");
         return -400;
     }
 
     wchar_t command_line[kMaxCmdLine] = {};
-    wcscpy_s(command_line, prms.linker_path.c_str());
+    wcscpy_s(command_line, linker_path.c_str());
 
     wchar_t copy_rsp[kMaxCmdLine] = {};
     copy_rsp[0] = L'\0';

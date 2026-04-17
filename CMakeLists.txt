@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Static CRT (/MT, /MTd) so the proxy is self-contained (no VC++ redistributable DLLs).
+if(MSVC)
+    cmake_policy(SET CMP0091 NEW)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 option(LINK_EXPORT_ALL_BUILD_PROXY "Build the Windows MSVC link proxy executable" ON)
 
 add_library(defgen STATIC
@@ -28,7 +34,6 @@ if(WIN32 AND LINK_EXPORT_ALL_BUILD_PROXY)
     if(MSVC)
         target_compile_options(link-export-all PRIVATE /W4 /permissive-)
     endif()
-    target_link_libraries(link-export-all PRIVATE Shlwapi.lib)
     set_target_properties(link-export-all PROPERTIES
         OUTPUT_NAME "link-export-all"
         WIN32_EXECUTABLE FALSE
