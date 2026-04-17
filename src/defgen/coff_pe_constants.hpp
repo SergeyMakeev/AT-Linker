@@ -3,7 +3,8 @@
 #include <cstdint>
 
 // PE/COFF constants (winnt.h) kept local for a portable static lib.
-namespace defgen::coff {
+namespace defgen::coff
+{
 
 inline constexpr std::uint16_t IMAGE_FILE_MACHINE_I386 = 0x014c;
 inline constexpr std::uint16_t IMAGE_FILE_MACHINE_AMD64 = 0x8664;

@@ -1,6 +1,6 @@
 # link-export-all
 
-**Bring an “export many symbols from object files into a DLL” workflow to the Microsoft linker.** On GCC/Clang/ELF, people often talk about broad symbol export using visibility and linker flags (for example `-Wl,--export-dynamic` for executables, or default-visibility shared objects). **MSVC `link.exe` has no single switch** that means “take these `.obj` files and export essentially everything suitable as a DLL surface.” This project fills that gap by **scanning COFF (`.obj`) or ELF (`.o`) objects**, generating a **module-definition (`.def`)** file, and then invoking the **real** `link.exe`.
+**Bring an "export many symbols from object files into a DLL" workflow to the Microsoft linker.** On GCC/Clang/ELF, people often talk about broad symbol export using visibility and linker flags (for example `-Wl,--export-dynamic` for executables, or default-visibility shared objects). **MSVC `link.exe` has no single switch** that means "take these `.obj` files and export essentially everything suitable as a DLL surface." This project fills that gap by **scanning COFF (`.obj`) or ELF (`.o`) objects**, generating a **module-definition (`.def`)** file, and then invoking the **real** `link.exe`.
 
 Annotating **`__declspec(dllexport)`** on every relevant symbol is fine for a small, controlled API. It is **impractical for large, existing codebases** (millions of lines, symbols spread across translation units). A generated `.def` derived from object files scales where manual annotation does not.
 
@@ -59,12 +59,12 @@ opt.object_count_line = ";ObjectCount=1";
 const defgen::GenerateResult r =
     defgen::generate_def({ std::filesystem::path("a.obj") }, defgen::ObjectFormat::Coff, opt);
 if (r.ec != defgen::Errc::Ok) { /* r.message */ }
-// r.out.lines — write to a .def file
+// r.out.lines - write to a .def file
 ```
 
 ## Limitations
 
-- **Heuristics**, not a formal “every symbol in the universe” guarantee: COMDAT handling, name filtering (`??`, `__real`, etc.), and **functions vs. data** mirror the legacy implementation (data exports are still not emitted in the COFF `.def` path).
+- **Heuristics**, not a formal "every symbol in the universe" guarantee: COMDAT handling, name filtering (`??`, `__real`, etc.), and **functions vs. data** mirror the legacy implementation (data exports are still not emitted in the COFF `.def` path).
 - **Proxy is Windows-only**; the **`defgen`** library is intended to stay **portable** for parsing and testing.
 
 ## License

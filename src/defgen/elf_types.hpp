@@ -2,7 +2,8 @@
 
 #include <cstdint>
 
-namespace defgen::detail {
+namespace defgen::detail
+{
 
 using byte1 = std::uint8_t;
 using byte2 = std::uint16_t;
@@ -11,8 +12,8 @@ using byte8 = std::uint64_t;
 
 using ELFIdent = byte1[16];
 
-template <typename TOffset>
-struct ElfHeader {
+template <typename TOffset> struct ElfHeader
+{
     ELFIdent e_ident;
     byte2 e_type;
     byte2 e_machine;
@@ -29,8 +30,8 @@ struct ElfHeader {
     byte2 e_shstrndx;
 };
 
-template <typename TOffset>
-struct SectionHeader {
+template <typename TOffset> struct SectionHeader
+{
     byte4 sh_name;
     byte4 sh_type;
     TOffset sh_flags;
@@ -43,11 +44,10 @@ struct SectionHeader {
     TOffset sh_entsize;
 };
 
-template <typename TOffset>
-struct SymbolHeader;
+template <typename TOffset> struct SymbolHeader;
 
-template <>
-struct SymbolHeader<byte4> {
+template <> struct SymbolHeader<byte4>
+{
     byte4 st_name;
     byte4 st_value;
     byte4 st_size;
@@ -56,8 +56,8 @@ struct SymbolHeader<byte4> {
     byte2 st_shndx;
 };
 
-template <>
-struct SymbolHeader<byte8> {
+template <> struct SymbolHeader<byte8>
+{
     byte4 st_name;
     byte1 st_info;
     byte1 st_other;

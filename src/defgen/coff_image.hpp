@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace defgen::detail {
+namespace defgen::detail
+{
 
 using word = std::uint16_t;
 using dword = std::uint32_t;
@@ -17,8 +18,10 @@ using byte = std::uint8_t;
 #pragma pack(push, 1)
 using SCoffName = char[8];
 
-struct SCoffImage {
-    struct SCoffHeaderBigObj {
+struct SCoffImage
+{
+    struct SCoffHeaderBigObj
+    {
         word Sig1;
         word Sig2;
         word Version;
@@ -34,7 +37,8 @@ struct SCoffImage {
         dword nSymbols;
     };
 
-    struct SCoffSymbolBigObj {
+    struct SCoffSymbolBigObj
+    {
         SCoffName szName;
         int nValue;
         dword nSection;
@@ -43,7 +47,8 @@ struct SCoffImage {
         byte nAuxSymbols;
     };
 
-    struct SCoffSectionDefinitionBigObj {
+    struct SCoffSectionDefinitionBigObj
+    {
         dword dwSize;
         word nRelocs;
         word nLineNumbers;
@@ -55,7 +60,8 @@ struct SCoffImage {
         byte unused[2];
     };
 
-    struct SCoffHeader {
+    struct SCoffHeader
+    {
         word machine;
         word nSections;
         dword timeStamp;
@@ -65,7 +71,8 @@ struct SCoffImage {
         word flags;
     };
 
-    struct SCoffSection {
+    struct SCoffSection
+    {
         SCoffName szName;
         dword dwImageSize;
         dword dwAddrStart;
@@ -78,7 +85,8 @@ struct SCoffImage {
         dword flags;
     };
 
-    struct SCoffSymbol {
+    struct SCoffSymbol
+    {
         SCoffName szName;
         int nValue;
         word nSection;
@@ -87,7 +95,8 @@ struct SCoffImage {
         byte nAuxSymbols;
     };
 
-    struct SCoffSectionDefinition {
+    struct SCoffSectionDefinition
+    {
         dword dwSize;
         word nRelocs;
         word nLineNumbers;
@@ -107,15 +116,19 @@ struct SCoffImage {
     SCoffSymbol* pSymbolsStd = nullptr;
     SCoffSymbolBigObj* pSymbolsBig = nullptr;
 
-    [[nodiscard]] byte GetNumAuxSymbols(int index) const {
-        if (pSymbolsStd != nullptr) {
+    [[nodiscard]] byte GetNumAuxSymbols(int index) const
+    {
+        if (pSymbolsStd != nullptr)
+        {
             return pSymbolsStd[index].nAuxSymbols;
         }
         return pSymbolsBig[index].nAuxSymbols;
     }
 
-    void GetSymbol(int index, SCoffSymbolBigObj* result) const {
-        if (pSymbolsStd != nullptr) {
+    void GetSymbol(int index, SCoffSymbolBigObj* result) const
+    {
+        if (pSymbolsStd != nullptr)
+        {
             result->nAuxSymbols = pSymbolsStd[index].nAuxSymbols;
             result->nSection = pSymbolsStd[index].nSection;
             result->nStorageClass = pSymbolsStd[index].nStorageClass;
@@ -132,8 +145,10 @@ struct SCoffImage {
         std::memcpy(result->szName, pSymbolsBig[index].szName, sizeof(SCoffName));
     }
 
-    [[nodiscard]] byte GetSectionSelectionFromSectionDefinition(int index) const {
-        if (pSymbolsStd != nullptr) {
+    [[nodiscard]] byte GetSectionSelectionFromSectionDefinition(int index) const
+    {
+        if (pSymbolsStd != nullptr)
+        {
             auto& def = *reinterpret_cast<SCoffSectionDefinition*>(&pSymbolsStd[index]);
             return def.nSelection;
         }
@@ -150,9 +165,11 @@ struct SCoffImage {
 };
 #pragma pack(pop)
 
-inline void GetName(const SCoffImage& image, const SCoffName& a, std::string* pRes) {
+inline void GetName(const SCoffImage& image, const SCoffName& a, std::string* pRes)
+{
     const int* pA = reinterpret_cast<const int*>(&a);
-    if (pA[0] != 0) {
+    if (pA[0] != 0)
+    {
         char szBuf[16]{};
         static_assert(sizeof(a) < sizeof(szBuf));
         std::memcpy(szBuf, &a, sizeof(a));
