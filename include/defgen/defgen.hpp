@@ -20,7 +20,7 @@ struct GenerateOptions
 {
     /// Substrings; if any match an export name, that name is omitted (same idea as legacy `DefBuildIgnores.txt` lines).
     std::vector<std::string> ignore_substrings;
-    /// When true, emit an ELF-style `export { ... }` block (legacy `.emd` path) instead of a MSVC `.def` `EXPORTS` section.
+    /// When true, emit SN Linker EMD text (`Library:` / `export:`) for PS4 PRX instead of a MSVC `.def` `EXPORTS` section.
     bool elf_style_export_block = false;
     /// Basename (no extension) used for `Library: <name> {` when `elf_style_export_block` is true.
     std::string library_basename;
