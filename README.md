@@ -29,6 +29,8 @@ Outputs (typical):
 
 To build only the library (e.g. on CI without the proxy), configure with `-DLINK_EXPORT_ALL_BUILD_PROXY=OFF`.
 
+**CI:** GitHub Actions builds Release/x64 on every push and pull request (see `.github/workflows/windows.yml`); artifacts include `link-export-all.exe` and `defgen.lib`.
+
 The proxy and `defgen` are built with the **static MSVC runtime** (`/MT` / `/MTd`) so the executable does not depend on the VC++ redistributable DLLs (`vcruntime*.dll`, `msvcp*.dll`). You can confirm with `dumpbin /dependents link-export-all.exe` (only Windows system DLLs such as `KERNEL32.dll` should appear).
 
 ## Using the proxy
