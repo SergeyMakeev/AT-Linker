@@ -1,0 +1,6 @@
+# Copy to DefBuildIgnores.txt next to your build (working directory) if you want to filter exports.
+# Each non-empty line is a substring; if it appears in an export name, that name is omitted.
+#
+# Example:
+# __imp_
+# ?_
