@@ -23,7 +23,7 @@ Annotating **`__declspec(dllexport)`** on every relevant symbol is fine for a sm
 | **`defgen` (static library)** | Cross-platform C++20 library: turns object file lists into export text: either a MSVC `.def` (`EXPORTS`) or a **`.emd`** file in the **SN Linker `Library:` / `export:`** form (see [EMD files (PS4 PRX)](#emd-files-ps4-prx)). |
 | **`link-export-all` (Windows executable)** | Drop-in **proxy** around the **real linker** (`link.exe` on PC, **SN Linker** on PS4, etc.): parses MSVC-style arguments, generates/updates **`.def`** or **`.emd`**, then `CreateProcess` the real executable from **`/lorig:`** or **`LINK_EXPORT_ALL_LINKER`**. |
 
-See **`plan.md`** for design and migration notes. Legacy Visual Studio projects under `AT_Linker/` and `CoffParser/` are **not** the canonical build (CMake is).
+See **`plan.md`** for design notes. **CMake** is the only supported build.
 
 ### EMD files (PS4 PRX)
 
