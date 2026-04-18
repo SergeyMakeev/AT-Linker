@@ -2,7 +2,7 @@
 
 # link-export-all
 
-**Bring an "export many symbols from object files into a DLL" workflow to the Microsoft linker.** On GCC/Clang/ELF, people often talk about broad symbol export using visibility and linker flags (for example `-Wl,--export-dynamic` for executables, or default-visibility shared objects). **MSVC `link.exe` has no single switch** that means "take these `.obj` files and export essentially everything suitable as a DLL surface." This project fills that gap by **scanning COFF (`.obj`) or ELF (`.o`) objects**, generating a **module-definition (`.def`)** file, and then invoking the **real** `link.exe`.
+**Bring an "export many symbols from object files into a DLL" workflow to the Microsoft linker.** On GCC/Clang/ELF, people often talk about broad symbol export using visibility and linker flags (for example `-rdynamic -Wl,--export-dynamic` for executables, or default-visibility shared objects). **MSVC `link.exe` has no single switch** that means "take these `.obj` files and export essentially everything suitable as a DLL surface." This project fills that gap by **scanning COFF (`.obj`) or ELF (`.o`) objects**, generating a **module-definition (`.def`)** file, and then invoking the **real** `link.exe`.
 
 Annotating **`__declspec(dllexport)`** on every relevant symbol is fine for a small, controlled API. It is **impractical for large, existing codebases** (millions of lines, symbols spread across translation units). A generated `.def` derived from object files scales where manual annotation does not.
 
